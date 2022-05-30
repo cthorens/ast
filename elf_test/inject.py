@@ -8,7 +8,7 @@ inject_pot = f.readlines()
 
 count = -1
 
-if os.path.exists(path_bugs):
+if not os.path.exists(path_bugs):
     os.mkdir(path_bugs)
 
 for ip in inject_pot:
