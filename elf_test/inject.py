@@ -8,6 +8,9 @@ inject_pot = f.readlines()
 
 count = -1
 
+if os.path.exists(path_bugs):
+    os.mkdir(path_bugs)
+
 for ip in inject_pot:
     count += 1
 
@@ -32,7 +35,7 @@ for ip in inject_pot:
 
         if not os.path.exists(path_bugs):
             os.makedirs(path_bugs)
-        new_f2 = open(path_bugs+"/"+ip_file.replace("/","-")+"_"+str(count)+".rs","w")
+        new_f2 = open(path_bugs+"/"+ip_file.replace("/","|")+"__"+str(count)+".rs","w")
 
         f2_lines = "".join(f2_lines)
         new_f2.write(f2_lines)
