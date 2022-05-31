@@ -1,4 +1,10 @@
+#!/usr/bin/env python3
+
+import sys
+
 from pandare import Panda
+
+cmd = sys.argv[1]
 
 panda = Panda(generic="x86_64")
 
@@ -7,7 +13,7 @@ recording_name = "test_recording"
 @panda.queue_blocking
 def run_cmd():
     panda.record_cmd(
-            "./main",
+            cmd,
             recording_name=recording_name,
             copy_directory="app",
             setup_command="cd /root/app",

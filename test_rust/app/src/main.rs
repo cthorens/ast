@@ -8,17 +8,18 @@ fn main() {
 
     f.read(&mut buffer).unwrap();
 
-    println!("{}", buffer[0] + buffer[1]);
+
+    println!("{}", buffer[0].wrapping_add(buffer[1]));
 
     if buffer[0] == 0 {
         println!("{}", buffer[1]);
     }
 
-    let add = buffer[0] as u16 + buffer[1] as u16 + buffer[2] as u16;
+    let add = (buffer[0] as u16).wrapping_add(buffer[1] as u16).wrapping_add(buffer[2] as u16);
 
     if add <= 10 {
         println!("{}", add);
     } else {
-        println!("add bigger than 10 : {}", add + buffer[5] as u16);
+        println!("add bigger than 10 : {}", add.wrapping_add(buffer[5] as u16));
     }
 }

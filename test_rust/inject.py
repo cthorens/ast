@@ -1,5 +1,9 @@
+#!/usr/bin/env python3
+
 import random
 import os
+
+import re
 
 path_bugs = "bug_collection"
 
@@ -11,15 +15,32 @@ count = -1
 if not os.path.exists(path_bugs):
     os.mkdir(path_bugs)
 
+
+
+main_def_pattern = re.compile(r'fn\s*main')
+main_pub_def_pattern = re.compile(r'pub\s*fn\s*main')
+
+
 for ip in inject_pot:
     count += 1
 
     ip_clean = ip.strip("\n").split(":")
     ip_file = ip_clean[0]
+    if not os.path.exists(ip_file):
+        print(f"WARN: file does not exist {ip_file}. Skipping.")
+        continue
     ip_number = int(ip_clean[1]) - 1
 
     f2 = open(ip_file,"r")
     f2_lines = f2.readlines()
+
+    
+    # make the main function public
+    for i, l in enumerate(f2_lines):
+        if not main_pub_def_pattern.match(l):
+            l2 = main_def_pattern.sub("pub fn main", l)
+            f2_lines[i] = l2 
+
     bug_line = f2_lines[ip_number]
     
     if " = " in bug_line:
@@ -35,6 +56,7 @@ for ip in inject_pot:
 
         if not os.path.exists(path_bugs):
             os.makedirs(path_bugs)
+        
         new_f2 = open(path_bugs+"/"+ip_file.replace("/","|")+"__"+str(count)+".rs","w")
 
         f2_lines = "".join(f2_lines)
