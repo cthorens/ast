@@ -16,11 +16,6 @@ if not os.path.exists(path_bugs):
     os.mkdir(path_bugs)
 
 
-
-main_def_pattern = re.compile(r'fn\s*main')
-main_pub_def_pattern = re.compile(r'pub\s*fn\s*main')
-
-
 for ip in inject_pot:
     count += 1
 
@@ -33,13 +28,6 @@ for ip in inject_pot:
 
     f2 = open(ip_file,"r")
     f2_lines = f2.readlines()
-
-    
-    # make the main function public
-    for i, l in enumerate(f2_lines):
-        if not main_pub_def_pattern.match(l):
-            l2 = main_def_pattern.sub("pub fn main", l)
-            f2_lines[i] = l2 
 
     bug_line = f2_lines[ip_number]
     

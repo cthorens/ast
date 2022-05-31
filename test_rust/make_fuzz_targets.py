@@ -3,6 +3,7 @@
 from pathlib import Path
 import shutil
 import os
+import re
 
 import tomlkit
 
@@ -13,6 +14,13 @@ bug_fuzzing_collection = Path("bug_fuzzing_collection").absolute()
 
 bug_fuzzing_collection.mkdir()
 
+main_def_pattern = re.compile(r'fn\s*main')
+main_pub_def_pattern = re.compile(r'pub\s*fn\s*main')
+def make_main_public(src):
+    if main_pub_def_pattern.match(src):
+        return src
+    else:
+        return main_def_pattern.sub("pub fn main", src)
 
 cargo_src_f = Path("app/Cargo.toml")
 cargo_dest = ""
@@ -38,10 +46,12 @@ for i, bug_src in enumerate(bug_collection.iterdir()):
     (destdir / "injection_description.txt").write_text(bug_src.stem)
 
     # copy source code to target
+    # additionnaly replace "fn main" by "pub fn main"
+
     codedir = destdir / "src"
     codedir.mkdir()
     dest_code = codedir / "lib.rs"
-    shutil.copy(bug_src, dest_code)
+    dest_code.write_text(make_main_public(bug_src.read_text()))
 
     # write a cargo file
     (destdir / "Cargo.toml").write_text(cargo_dest)
