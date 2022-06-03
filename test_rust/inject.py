@@ -1,34 +1,23 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 import random
 import os
 
-import re
+path_bugs = Path("bug_collection")
+path_bugs.mkdir(exist_ok=True)
 
-path_bugs = "bug_collection"
+f = Path("lines.txt")
+inject_pot = f.read_text().splitlines()
 
-f = open("lines.txt","r")
-inject_pot = f.readlines()
-
-count = -1
-
-if not os.path.exists(path_bugs):
-    os.mkdir(path_bugs)
-
+bug_id = 0
 
 for ip in inject_pot:
-    count += 1
 
     ip_clean = ip.strip("\n").split(":")
-    ip_file = ip_clean[0]
-    if not os.path.exists(ip_file):
-        print(f"WARN: file does not exist {ip_file}. Skipping.")
-        continue
+    ip_file = Path(ip_clean[0])
     ip_number = int(ip_clean[1]) - 1
-
-    f2 = open(ip_file,"r")
-    f2_lines = f2.readlines()
-
+    f2_lines = ip_file.read_text().splitlines()
     bug_line = f2_lines[ip_number]
     
     if " = " in bug_line:
@@ -42,18 +31,21 @@ for ip in inject_pot:
         bug_str = "if " + var_name + " as u8 == "+ str(rand_b) + " { panic!(\"Bug found\") }"
         f2_lines.insert(ip_number+1,bug_str+"\n")
 
-        if not os.path.exists(path_bugs):
-            os.makedirs(path_bugs)
+
+        bug_dir = path_bugs / f"bug{bug_id}"
+        bug_dir.mkdir(exist_ok=True)
+
+        # write the modified file and keep track of its path
+        # in the orginal folder
+        new_f2 = bug_dir / "bug.rs"
+        new_f2_info_file = bug_dir / "info.txt"
+
+        f2_lines = "\n".join(f2_lines)
+        new_f2.write_text(f2_lines)
+
+        new_f2_info_file.write_text(str(ip_file) + "\n")
+
+        bug_id += 1
+
         
-        new_f2 = open(path_bugs+"/"+ip_file.replace("/","|")+"__"+str(count)+".rs","w")
-
-        f2_lines = "".join(f2_lines)
-        new_f2.write(f2_lines)
         
-        
-
-        new_f2.close()
-
-    f2.close()
-
-f.close()
