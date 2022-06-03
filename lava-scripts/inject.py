@@ -43,7 +43,7 @@ for ip in inject_pot:
         f2_lines = "\n".join(f2_lines)
         new_f2.write_text(f2_lines)
 
-        new_f2_info_file.write_text(str(ip_file) + "\n")
+        new_f2_info_file.write_text("\n".join([str(ip_file), str(bug_line)]))
 
         bug_id += 1
 

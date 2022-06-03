@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+SCRIPTS_DIR="$(realpath "../lava-scripts")"
 
 NAME="test_rust"
 TARGET="./target/debug/test_rust"
@@ -13,10 +14,10 @@ echo "Compile the executable..."
 
 
 echo "Run panda dynamic analysis..."
-python3 panda.py "$TARGET"
+python3 panda.py
 
 echo "Parse logs to get tainted asm lines..."
-python3 parse_logs.py "$NAME"
+python3 "$SCRIPTS_DIR/parse_logs.py" "$NAME"
 
 echo "Convert tainted asm lines to src lines..."
 cat addr.txt | \
@@ -26,4 +27,10 @@ cat addr.txt | \
   tee lines.txt
 
 echo "Inject bugs..."
-python3 inject.py
+python3 "$SCRIPTS_DIR/inject.py"
+
+
+echo "Make fuzz targets"
+python3 "$SCRIPTS_DIR/make_fuzz_targets.py" "./app/"
+
+bash "$SCRIPTS_DIR/make_main_public.sh" "bug_fuzzing_collection"

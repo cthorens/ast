@@ -18,6 +18,9 @@ def make_main_public(src):
     else:
         return main_def_pattern.sub("pub fn main", src)
 
+
+
+
 def main(argv):
     src_app = Path("app/").resolve()
     if len(argv) >= 2:
@@ -31,13 +34,28 @@ def main(argv):
 
     cargo_src_f = src_app / "Cargo.toml"
     cargo_dest_content = ""
+    pkg_name = ""
+    has_lib = True
     with cargo_src_f.open("r") as f:
         cargo_src = tomlkit.load(f)
 
         if not "lib" in cargo_src:
             cargo_src["lib"] = {}
+            has_lib = False
 
         cargo_dest_content = tomlkit.dumps(cargo_src)
+
+        pkg_name = cargo_src["package"]["name"]
+
+
+    min_lib="""\
+pub mod main;
+
+pub fn main_entry()
+{
+    return main::main();
+}    
+""".format(pkg_name)
 
 
     for bug_src in bug_collection.iterdir():
@@ -71,9 +89,15 @@ def main(argv):
         #bugfile_in_dest.write_text(make_main_public(bug_src.read_text()))
 
         # write a cargo file
+        # and optionnaly a minimal library entrypoint
         (destdir / "Cargo.toml").write_text(cargo_dest_content)
+        libfile = bugfile_in_dest.with_name("lib.rs")
+        if not has_lib:
+            if libfile.exists():
+                print("WARN: no lib in Cargo.toml but lib.rs already exists! Overwriting.")
+            libfile.write_text(min_lib)
 
-
+        
         # symlink the fuzz targets
         fuzz_dir = destdir / "fuzz"
         os.symlink(os.path.relpath(fuzz_common, destdir), fuzz_dir)
