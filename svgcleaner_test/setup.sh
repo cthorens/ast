@@ -8,5 +8,5 @@ cd ../..
 cp -f Cargo_svgcleaner.toml app/svgcleaner/Cargo.toml
 
 cd app/svgcleaner
-RUSTFLAGS="-g -C target-feature=+crt-static" cargo build
+RUSTFLAGS="-g -C target-feature=+crt-static" cargo build --target x86_64-unknown-linux-gnu
 cd ../..
