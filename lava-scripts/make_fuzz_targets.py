@@ -55,7 +55,7 @@ pub fn main_entry()
 {
     return main::main();
 }    
-""".format(pkg_name)
+"""
 
 
     for bug_src in bug_collection.iterdir():
