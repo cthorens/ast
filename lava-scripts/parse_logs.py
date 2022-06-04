@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from pandare import plog_reader
 import sys
 
