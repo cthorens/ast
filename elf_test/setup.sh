@@ -15,5 +15,5 @@ cp -f Cargo_rust-readelf.toml app/rust-readelf/Cargo.toml
 (
   # Build rust readelf (and rust elf)
   cd app/rust-readelf
-  RUSTFLAGS="-g -C target-feature=+crt-static" cargo build
+  RUSTFLAGS="-g -C target-feature=+crt-static" cargo build --target x86_64-unknown-linux-gnu
 )
