@@ -7,7 +7,7 @@ SCRIPTS_DIR="$(realpath "../lava-scripts")"
 echo "Compile the executable..."
 (
   cd app/rust-readelf &&
-  RUSTFLAGS="-g -C target-feature=+crt-static" cargo build
+  RUSTFLAGS="-g -C target-feature=+crt-static" cargo build --target x86_64-unknown-linux-gnu
 )
 
 echo "Run panda dynamic analysis..."
