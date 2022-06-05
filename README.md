@@ -61,7 +61,7 @@ $ cat bug_fuzz_collection/bug0/info.txt
 102
 ```
 
-It is now possible to run the fuzzers: you may choose between AFL.rs or libFuzzer. You may exit Docker and run these on the host operating system.
+It is now possible to run the fuzzers: you may choose between AFL.rs or libFuzzer. You may exit Docker and run these on the host operating system. You may change the timeout variable in both fuzzing scripts to control how much time is spent on each bug at most.
 
 NOTE: You __need__ to be in the directory `elf_test` (or `svgcleaner_test`) when running the scripts.
 
