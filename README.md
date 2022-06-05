@@ -65,7 +65,7 @@ It is now possible to run the fuzzers: you may choose between AFL.rs or libFuzze
 
 NOTE: You __need__ to be in the directory `elf_test` (or `svgcleaner_test`) when running the scripts.
 
-```
+```console
 # 1. libFuzzer
 
 # Install cargo fuzz
@@ -99,7 +99,7 @@ $ cargo install afl
 # Need to pass:
 # - the location of the program with the fuzzing entrypoint __in the sources__
 # - the name of the binary and the arguments to pass (excluding the filename)
-$ python3 ../lava-scripts/try_fuzz_all_afl.py app/rust-readelf rust-readelf -h -f
+$ python3 ../lava-scripts/try_fuzz_all_afl.py app/rust-readelf "rust-readelf -h -f @@"
 Fuzzing bug16 ...                                                                                                     
 Build executable to test...                                                                                           
 binary is /home/vogier/Documents/Polytechnique-git/ast/elf_test/bug_fuzzing_collection/bug16/rust-readelf/target/debug/rust-readelf                                                                                        Build the fuzz target...
@@ -113,4 +113,23 @@ thread 'main' panicked at 'Bug found', /home/vogier/Documents/Polytechnique-git/
 Bug found for bug16 !
 Fuzzing bug21 ...
 ...
+```
+
+
+
+## Svgcleaner
+
+Similarly, it is possible to inject bugs in svgcleaner and fuzz them
+
+```console
+$ docker exec -it panda bash
+$ cd /app/svgcleaner_test
+$ ./setup.sh
+$ ./execute.sh
+
+# libfuzzer
+$ python3 ../lava-scripts/try_fuzz_all.py app/svgcleaner
+
+# AFL
+$ ../lava-scripts/try_fuzz_all_afl.py app/svgcleaner "svgcleaner @@ out.svg"
 ```

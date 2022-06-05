@@ -7,6 +7,7 @@ import os
 import subprocess
 import shutil
 import time
+import shlex
 
 import asyncinotify
 
@@ -26,12 +27,12 @@ def log(s):
 
 
 if(len(sys.argv) < 3):
-    print("try_fuzz_all.py <fuzz_target_in_apps> <cmd> [args]")
+    print("try_fuzz_all.py <fuzz_target_in_apps> <cmd with @@ as inputfile>")
     exit(0)
 
 fuzz_target = sys.argv[1]
-cmd = sys.argv[2:]
-
+cmd = sys.argv[2]
+cmd_split = shlex.split(cmd)
 
 apps_dir = Path("app/").resolve()
 afl_fuzz_dir = Path("fuzz_afl").resolve()
@@ -71,7 +72,7 @@ async def main():
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         await p.wait()
-        binary = apps_to_fuzz_link / fuzz_target_rel / "target/debug" / cmd[0]
+        binary = apps_to_fuzz_link / fuzz_target_rel / "target/debug" / cmd_split[0]
         log("-> binary is {}".format(binary.resolve()))
 
         #rebuild fuzz target against the new source
@@ -118,8 +119,9 @@ async def main():
                     crashfile = event.path
                     if not (crashfile.is_file() and crashfile.parent == afl_crashdir):
                         continue
-
-                    cmd2 = [str(binary), *cmd[1:], str(crashfile)]
+                    cmd_args = shlex.split(cmd.replace("@@", str(crashfile)))[1:]
+                    cmd2 = [str(binary)] + cmd_args
+                    print("cmd=", cmd2)
                     log("Running crashfile:\n")
                     # test if the crashfile triggers the bug
                     bug_proc = await asyncio.create_subprocess_exec(
