@@ -16,7 +16,7 @@ def select_pc_branch(pc):
             main_pc_branch.add(pc)
 
 if len(sys.argv) < 2:
-    print("Usage : parse_logs.py executable_name max_liveness(default=10) min_bytes_to_use(default=2)")
+    print("Usage : parse_logs.py executable_name max_liveness(default=10) min_bytes_to_use(default=1)")
     exit()
 
 
@@ -28,7 +28,7 @@ else:
 if len(sys.argv) > 3:
     min_bytes = int(sys.argv[3])
 else:
-    min_bytes = 2
+    min_bytes = 1
 
 main_pc = set()
 main_pc_branch = set()
