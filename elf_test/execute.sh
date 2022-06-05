@@ -23,7 +23,7 @@ echo "Inject bugs..."
 python3 "$SCRIPTS_DIR/inject.py"
 
 echo "Make fuzz targets"
-python3 "$SCRIPTS_DIR/make_fuzz_targets.py" "./app/rust-elf"
+python3 "$SCRIPTS_DIR/make_fuzz_targets.py" "./app/rust-readelf"
 
 
 #python3 test.py
