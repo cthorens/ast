@@ -17,7 +17,7 @@ echo "Parse logs to get tainted asm lines..."
 python3 "$SCRIPTS_DIR/parse_logs.py" rust-readelf
 
 echo "Convert tainted asm lines to src lines..."
-cat addr.txt | addr2line  -e app/rust-readelf/target/debug/rust-readelf | sort --unique | grep app > lines.txt
+cat addr.txt | addr2line  -e app/rust-readelf/target/x86_64-unknown-linux-gnu/debug/rust-readelf | sort --unique | grep app > lines.txt
 
 echo "Inject bugs..."
 python3 "$SCRIPTS_DIR/inject.py"

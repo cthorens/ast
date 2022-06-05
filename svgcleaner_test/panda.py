@@ -9,7 +9,7 @@ recording_name = "test_recording"
 @panda.queue_blocking
 def run_cmd():
     panda.record_cmd(
-            "./svgcleaner/target/debug/svgcleaner test.svg out.svg",
+            "./svgcleaner/target/x86_64-unknown-linux-gnu/debug/svgcleaner test.svg out.svg",
             recording_name=recording_name,
             copy_directory="app",
             setup_command="cd /root/app",

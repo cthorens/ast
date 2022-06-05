@@ -20,7 +20,7 @@ echo "Parse logs to get tainted asm lines..."
 python3 "$SCRIPTS_DIR/parse_logs.py" svgcleaner
 
 echo "Convert tainted asm lines to src lines..."
-cat addr.txt | addr2line  -e app/svgcleaner/target/debug/svgcleaner | sort --unique | grep app > lines.txt
+cat addr.txt | addr2line  -e app/svgcleaner/target/x86_64-unknown-linux-gnu/debug/svgcleaner | sort --unique | grep app > lines.txt
 
 
 echo "Inject bugs..."
