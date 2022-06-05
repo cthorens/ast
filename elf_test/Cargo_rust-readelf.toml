@@ -10,9 +10,12 @@ keywords = ["elf","readelf"]
 readme = "README.md"
 
 [[bin]]
+path = "src/rust-readelf.rs"
 name = "rust-readelf"
+
+[lib]
+path = "src/rust-readelf.rs"
 
 [dependencies]
 argparse = "0.*"
 elf = { path = "../rust-elf" }
-

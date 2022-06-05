@@ -7,9 +7,13 @@
 
   # replace unrecoverable panics by recoverable Err()
   patch rust-elf/src/utils.rs utils.patch
+
+  # add fuzzing entrypoint in executable
+  patch  rust-readelf/src/rust-readelf.rs readelf.patch
 )
 
 # Make rust-readelf build against the local version of rust-elf
+# and expose main_entrypoint() as a library function
 cp -f Cargo_rust-readelf.toml app/rust-readelf/Cargo.toml
 
 (

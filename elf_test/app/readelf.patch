@@ -1,0 +1,55 @@
+diff --git a/src/rust-readelf.rs b/src/rust-readelf.rs
+index e614b61..c247f5a 100644
+--- a/src/rust-readelf.rs
++++ b/src/rust-readelf.rs
+@@ -1,10 +1,24 @@
+ extern crate elf;
+ extern crate argparse;
+ 
++use std::env;
++use std::io::{stdout, stderr};
++use std::process::exit;
++
+ use std::path::PathBuf;
+ use argparse::{ArgumentParser, StoreTrue, Store};
+ 
++
+ fn main() {
++    let args = env::args().collect();
++    match main_entry(args) {
++        Ok(()) => (),
++        Err(e) => panic!("Error: {:?}", e),
++    };
++}
++
++
++pub fn main_entry(args : Vec<String>) -> Result<(),elf::ParseError> {
+     let mut file_header = false;
+     let mut program_headers = false;
+     let mut section_headers = false;
+@@ -29,14 +43,13 @@ fn main() {
+         ap.refer(&mut filename)
+             .add_option(&["-f", "--file-name"], Store,
+                         "ELF file to inspect");
+-        ap.parse_args_or_exit();
++        ap.parse(args, &mut stdout(), &mut stderr())
++        .map_err(|c| exit(c))
++        .ok();
+     }
+ 
+     let path: PathBuf = From::from(filename);
+-    let file = match elf::File::open_path(&path) {
+-        Ok(f) => f,
+-        Err(e) => panic!("Error: {:?}", e),
+-    };
++    let file = elf::File::open_path(&path)?;
+ 
+     if headers {
+         file_header = true;
+@@ -57,4 +70,6 @@ fn main() {
+             println!("{}", s.shdr);
+         }
+     }
++
++    Ok(())
+ }
