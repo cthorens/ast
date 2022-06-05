@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from pandare import Panda
 
 panda = Panda(generic="x86_64")
