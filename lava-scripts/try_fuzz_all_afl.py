@@ -27,30 +27,30 @@ def log(s):
 
 
 if(len(sys.argv) < 3):
-    print("try_fuzz_all.py <fuzz_target_in_apps> <cmd with @@ as inputfile>")
+    print("try_fuzz_all.py <app_to_fuzz_in_apps> <cmd with @@ as inputfile>")
     exit(0)
 
-fuzz_target = sys.argv[1]
+app_to_fuzz = sys.argv[1]
 cmd = sys.argv[2]
 cmd_split = shlex.split(cmd)
 
+
+
 apps_dir = Path("app/").resolve()
+app_to_fuzz_rel = os.path.relpath(app_to_fuzz, apps_dir)
+
 afl_fuzz_dir = Path("fuzz_afl").resolve()
+fuzz_target_dir = afl_fuzz_dir / "fuzz_target"
+fuzz_target_cargo_template = (fuzz_target_dir /  "Cargo.toml.template").read_text()
+fuzz_target_cargo = fuzz_target_dir / "Cargo.toml"
 
-fuzz_target_rel = os.path.relpath(fuzz_target, apps_dir)
-
-fuzz_dir = Path("bug_fuzzing_collection").resolve()
+bug_fuzzing_collection_dir = Path("bug_fuzzing_collection").resolve()
 
 
-bugdirs = [d for d in fuzz_dir.iterdir() if d.is_dir]
+bugdirs = [d for d in bug_fuzzing_collection_dir.iterdir() if d.is_dir]
 times_success = []
 times_failure = []
 
-
-     
-
-apps_to_fuzz_link = afl_fuzz_dir / "apps_to_fuzz"
-apps_to_fuzz_link_tmp = afl_fuzz_dir / "apps_to_fuzz_tmp"
 
 TIMEOUT = 1000
 
@@ -58,40 +58,34 @@ async def main():
     successes = 0
     for this_bugdir in bugdirs:
         log("Fuzzing {} ...".format(this_bugdir.name))
-        found_bug = False
-
-        # symlink the current source to fuzz
-        os.symlink(os.path.relpath(this_bugdir, afl_fuzz_dir), apps_to_fuzz_link_tmp)
-        os.replace(apps_to_fuzz_link_tmp, apps_to_fuzz_link)        
+        found_bug = False     
         
         # build the binary (to test crashes later)
         log("Build executable to test...")
-        p = await asyncio.create_subprocess_exec(
+        pbuild_exec = await asyncio.create_subprocess_exec(
             "cargo", "build",
-            cwd=apps_to_fuzz_link / fuzz_target_rel,
+            cwd=this_bugdir / app_to_fuzz_rel,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        await p.wait()
-        binary = apps_to_fuzz_link / fuzz_target_rel / "target/debug" / cmd_split[0]
+        binary = this_bugdir / app_to_fuzz_rel / "target/debug" / cmd_split[0]
         log("-> binary is {}".format(binary.resolve()))
 
-        #rebuild fuzz target against the new source
-        log("Build the fuzz target...")
-        p = await asyncio.create_subprocess_exec(
-            "cargo", "clean",
-            cwd=afl_fuzz_dir / "fuzz_target",
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        await p.wait()
-        p = await asyncio.create_subprocess_exec(
+        # rebuild fuzz target against the new source
+        # replace the path in the Cargo.toml to point to this_bugdir
+        cargo_content = fuzz_target_cargo_template.replace("@@BUG_DIRECTORY@@", str(this_bugdir)) 
+        fuzz_target_cargo.write_text(cargo_content)
+
+        log("Rebuild the fuzz target...")
+        pbuild_fuzz_target = await asyncio.create_subprocess_exec(
             "cargo", "afl", "build",
             cwd=afl_fuzz_dir / "fuzz_target",
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        await p.wait()
-
+        # Wait for both build jobs to complete
+        await asyncio.gather(pbuild_exec.wait(), pbuild_fuzz_target.wait())
 
         # remove the "out/" directory
+        log("Remove previous fuzz output...")
         afl_outdir = afl_fuzz_dir / "fuzz_target/out"
         if afl_outdir.exists():
             shutil.rmtree(afl_outdir)
@@ -157,8 +151,9 @@ async def main():
         this_bug_time = (time.monotonic_ns() - t0) * 1e-9
 
         # bug found or timeout: kill afl
-        log("Kill AFL...")
-        afl_proc.kill()
+        log("Terminate AFL...")
+        if afl_proc.returncode is None:
+            afl_proc.terminate()
 
         if found_bug:
             times_success.append(this_bug_time)
@@ -171,11 +166,13 @@ async def main():
 
     log(" Done fuzzing. {} / {} successes.".format(successes, len(bugdirs)))
     
-    avg_success = sum(times_success) / len(times_success)
-    avg_failure = sum(times_failure) / len(times_failure)
+    avg_success = sum(times_success) / len(times_success) if len(times_success) != 0 else 0
+    avg_failure = sum(times_failure) / len(times_failure) if len(times_failure) != 0 else 0
     
-    log(" Average time to find a bug: {}s".format(avg_success))
-    log(" Average time before giving up: {}s".format(avg_failure))
+    print(times_success)
+    print(times_failure)
+    log("Average time to find a bug: {}s".format(avg_success))
+    log("Average time before giving up: {}s".format(avg_failure))
 
 
 

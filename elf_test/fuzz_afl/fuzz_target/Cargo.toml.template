@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 afl = "*"
-svgcleaner = { "path" = "../apps_to_fuzz/svgcleaner" }
-svgdom = { "path" = "../apps_to_fuzz/svgdom" }
+readelf = { "path" = "@@BUG_DIRECTORY@@/rust-readelf" }
