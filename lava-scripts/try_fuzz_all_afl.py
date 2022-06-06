@@ -52,7 +52,7 @@ times_success = []
 times_failure = []
 
 
-TIMEOUT = 1000
+TIMEOUT = 120
 
 async def main():
     successes = 0
@@ -157,11 +157,11 @@ async def main():
 
         if found_bug:
             times_success.append(this_bug_time)
-            log("Bug found for {} !".format(this_bugdir.name))
+            log("Bug found for {} after {}s!".format(this_bugdir.name, this_bug_time))
             successes += 1
         else:
             times_failure.append(this_bug_time)
-            log("Failed to find bug for {}".format(this_bugdir.name))
+            log("Failed to find bug for {} after {}s".format(this_bugdir.name, this_bug_time))
         
 
     log(" Done fuzzing. {} / {} successes.".format(successes, len(bugdirs)))
